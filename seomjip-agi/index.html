@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>섬집 아기 받아쓰기</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Jua&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --sky: #e8f4fb;
+    --sea: #2f7fb5;
+    --sea-dark: #1d5b86;
+    --sand: #fbf3e4;
+    --wood: #c98c4f;
+    --ink: #2b3440;
+    --muted: #6b7785;
+    --card: #ffffff;
+    --line: #d6e3ec;
+    --ok: #2e9d5b;
+    --ok-bg: #e5f6ec;
+    --bad: #d2493f;
+    --bad-bg: #fde9e7;
+    --star: #f5b83d;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    min-height: 100vh;
+    font-family: "Gowun Dodum", "Malgun Gothic", sans-serif;
+    color: var(--ink);
+    background: linear-gradient(180deg, var(--sky) 0%, #f6fbff 55%, var(--sand) 100%);
+    display: flex; justify-content: center;
+    padding: 24px 16px 40px;
+  }
+  .app { width: 100%; max-width: 640px; }
+  h1, h2, .jua { font-family: "Jua", sans-serif; font-weight: 400; }
+  .card {
+    background: var(--card);
+    border-radius: 24px;
+    box-shadow: 0 10px 30px rgba(31, 80, 120, .12);
+    padding: 28px 24px;
+  }
+  .screen { display: none; animation: pop .35s ease; }
+  .screen.active { display: block; }
+  @keyframes pop { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+  /* intro */
+  .intro { text-align: center; }
+  .intro h1 { font-size: 2.6rem; margin: 4px 0 6px; color: var(--sea-dark); }
+  .intro .sub { color: var(--muted); margin: 0 0 18px; }
+  .intro img {
+    width: 100%; max-width: 360px; aspect-ratio: 1; object-fit: cover;
+    border-radius: 20px; border: 6px solid #fff;
+    box-shadow: 0 6px 18px rgba(0,0,0,.15);
+  }
+  .questions {
+    text-align: left; background: var(--sky); border-radius: 16px;
+    padding: 14px 18px; margin: 20px 0; line-height: 1.9;
+  }
+  .questions b { color: var(--sea-dark); }
+  .howto { text-align: left; color: var(--muted); font-size: .95rem; line-height: 1.7; margin: 0 0 20px; padding-left: 20px; }
+
+  /* buttons */
+  .btns { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  button, .btn {
+    font-family: "Jua", sans-serif; font-size: 1.15rem;
+    border: 0; border-radius: 999px; padding: 12px 26px;
+    cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
+    transition: transform .1s, box-shadow .1s, background .2s;
+  }
+  button:active, .btn:active { transform: scale(.96); }
+  .primary { background: var(--sea); color: #fff; box-shadow: 0 4px 0 var(--sea-dark); }
+  .primary:hover { background: #3a8fc8; }
+  .ghost { background: #fff; color: var(--sea-dark); border: 2px solid var(--line); }
+  .ghost:hover { border-color: var(--sea); }
+  .gold { background: var(--star); color: #4a3200; box-shadow: 0 4px 0 #c98f1c; }
+  button:disabled { opacity: .35; cursor: default; transform: none; }
+
+  /* top bar */
+  .top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; }
+  .top h2 { margin: 0; font-size: 1.5rem; color: var(--sea-dark); }
+  .listen { font-size: .95rem; padding: 8px 16px; }
+  .progress { display: flex; gap: 8px; margin-bottom: 22px; }
+  .progress span {
+    flex: 1; height: 10px; border-radius: 999px; background: var(--line); transition: background .3s;
+  }
+  .progress span.done { background: var(--sea); }
+  .progress span.now { background: var(--star); }
+  .step-label { color: var(--muted); font-size: .95rem; margin: -12px 0 18px; }
+
+  /* lyric lines */
+  .lyric {
+    font-size: 1.6rem; line-height: 2.2;
+    padding: 14px 16px; margin-bottom: 14px;
+    background: var(--sand); border-radius: 16px;
+    border-left: 6px solid var(--wood);
+    word-break: keep-all;
+  }
+  .lyric .num { font-family: "Jua", sans-serif; font-size: 1rem; color: var(--wood); margin-right: 8px; vertical-align: middle; }
+  .blank {
+    font: inherit; font-size: 1.45rem; color: var(--sea-dark);
+    border: 0; border-bottom: 3px solid var(--sea);
+    background: #fff; border-radius: 8px 8px 0 0;
+    padding: 0 6px; text-align: center; margin: 0 2px;
+    outline: none; vertical-align: baseline;
+  }
+  .blank:focus { background: #fffbe8; border-bottom-color: var(--star); }
+  .nav { display: flex; justify-content: space-between; margin-top: 24px; gap: 10px; }
+  .hint { text-align: center; color: var(--muted); font-size: .9rem; margin-top: 14px; }
+
+  /* result */
+  .result-head { text-align: center; }
+  .stars { font-size: 2.6rem; letter-spacing: 4px; margin: 6px 0; }
+  .stars .off { filter: grayscale(1); opacity: .3; }
+  .score { font-family: "Jua", sans-serif; font-size: 2rem; color: var(--sea-dark); margin: 4px 0; }
+  .msg { color: var(--muted); margin: 0 0 20px; }
+  .ans {
+    display: inline-block; padding: 0 8px; margin: 0 2px; border-radius: 8px;
+    line-height: 1.6; font-weight: 700;
+  }
+  .ans.ok { background: var(--ok-bg); color: var(--ok); }
+  .ans.bad { background: var(--bad-bg); color: var(--bad); text-decoration: line-through; text-decoration-thickness: 2px; }
+  .ans.empty { min-width: 2.5em; text-decoration: none; }
+  .fix { color: var(--ok); font-weight: 700; font-size: 1.1rem; margin-left: 2px; }
+  .result-lyrics .lyric { font-size: 1.35rem; line-height: 2.1; }
+  .full {
+    margin-top: 22px; padding: 18px; border-radius: 16px; background: var(--sky);
+    text-align: center; font-size: 1.2rem; line-height: 1.9; display: none;
+  }
+  .full.show { display: block; }
+  .full h3 { font-family: "Jua", sans-serif; font-weight: 400; margin: 0 0 6px; color: var(--sea-dark); }
+
+  /* confetti */
+  .confetti { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 10; }
+  .confetti i {
+    position: absolute; top: -30px; font-style: normal; font-size: 1.6rem;
+    animation: fall linear forwards;
+  }
+  @keyframes fall { to { transform: translateY(110vh) rotate(360deg); } }
+
+  @media (max-width: 480px) {
+    .card { padding: 22px 16px; }
+    .intro h1 { font-size: 2.1rem; }
+    .lyric { font-size: 1.3rem; padding: 12px; }
+    .blank { font-size: 1.2rem; }
+    button, .btn { font-size: 1.05rem; padding: 11px 20px; }
+    .result-lyrics .lyric { font-size: 1.15rem; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- 도입 -->
+  <section class="screen card intro active" id="intro">
+    <h1>🌊 섬집 아기</h1>
+    <p class="sub">노래를 듣고 가사를 써 보세요</p>
+    <img src="images/intro.png" alt="바닷가 집에서 아기가 잠을 자고, 엄마는 바닷가에서 굴을 따고 있는 그림">
+    <div class="questions">
+      <div><b>Q1.</b> 그림에 누가 있어요?</div>
+      <div><b>Q2.</b> 아기는 무엇을 하고 있어요?</div>
+      <div><b>Q3.</b> 엄마는 어디에 있어요? 무엇을 해요?</div>
+    </div>
+    <ol class="howto">
+      <li>노래를 들으면서 빈칸에 가사를 쓰세요.</li>
+      <li>한 화면에 두 줄씩 나와요. <b>다음</b> 버튼을 누르세요.</li>
+      <li>다 쓰면 <b>정답 확인</b>을 눌러 점수를 확인해요!</li>
+    </ol>
+    <div class="btns">
+      <a class="btn ghost" id="listen0" target="_blank" rel="noopener">🎵 노래 듣기</a>
+      <button class="primary" id="startBtn">시작하기 ▶</button>
+    </div>
+  </section>
+
+  <!-- 쓰기 -->
+  <section class="screen card" id="write">
+    <div class="top">
+      <h2>✏️ 가사 쓰기</h2>
+      <a class="btn ghost listen" id="listen1" target="_blank" rel="noopener">🎵 노래 듣기</a>
+    </div>
+    <div class="progress" id="progress"></div>
+    <p class="step-label" id="stepLabel"></p>
+    <div id="lines"></div>
+    <div class="nav">
+      <button class="ghost" id="prevBtn">◀ 이전</button>
+      <button class="primary" id="nextBtn">다음 ▶</button>
+    </div>
+    <p class="hint">Enter 키를 누르면 다음 빈칸으로 가요.</p>
+  </section>
+
+  <!-- 결과 -->
+  <section class="screen card" id="result">
+    <div class="result-head">
+      <h2 style="margin:0;color:var(--sea-dark);font-size:1.6rem">결과</h2>
+      <div class="stars" id="stars"></div>
+      <div class="score" id="score"></div>
+      <p class="msg" id="msg"></p>
+    </div>
+    <div class="result-lyrics" id="resultLines"></div>
+    <div class="btns" style="margin-top:20px">
+      <button class="primary" id="retryWrong">틀린 것 다시 쓰기</button>
+      <button class="gold" id="tryAgain">🔄 다시 해 보기</button>
+      <button class="ghost" id="showFull">전체 가사 보기</button>
+      <button class="ghost" id="restart">처음부터</button>
+    </div>
+    <div class="full" id="full"></div>
+  </section>
+</div>
+
+<script>
+  // 노래 듣기: 유튜브 검색 결과로 연결 (원하는 영상 주소로 바꿔도 됩니다)
+  const SONG_URL = "https://www.youtube.com/results?search_query=%EC%84%AC%EC%A7%91+%EC%95%84%EA%B8%B0+%EB%8F%99%EC%9A%94";
+
+  // 가사 데이터: 문자열은 그대로 보이고, {a: "정답"} 은 빈칸이 됩니다.
+  const b = (a, alt = []) => ({ a, alt });
+  const LINES = [
+    ["엄마가 섬그늘에"],
+    [b("굴"), " ", b("따러"), " ", b("가면")],
+    ["아기가 ", b("혼자"), " ", b("남아")],
+    [b("집을"), " ", b("보"), "다가"],
+    [b("파도"), "가 ", b("들려"), " ", b("주는")],
+    ["자장 노래", b("에")],
+    ["팔 베고 ", b("스르르르", ["스르르", "스르르르르"])],
+    [b("잠이"), " ", b("듭니다"), "."],
+  ];
+  const PER_PAGE = 2;
+  const PAGES = Math.ceil(LINES.length / PER_PAGE);
+
+  // 빈칸에 번호 붙이기
+  let blankId = 0;
+  LINES.forEach(line => line.forEach(seg => { if (typeof seg === "object") seg.id = blankId++; }));
+  const answers = new Array(blankId).fill("");
+  let page = 0;
+
+  const $ = id => document.getElementById(id);
+  const norm = s => s.replace(/[\s.,!?~]/g, "");
+  const isRight = seg => [seg.a, ...seg.alt].some(x => norm(x) === norm(answers[seg.id]));
+
+  document.querySelectorAll("#listen0, #listen1").forEach(a => a.href = SONG_URL);
+
+  function show(id) {
+    document.querySelectorAll(".screen").forEach(s => s.classList.toggle("active", s.id === id));
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function renderPage() {
+    $("progress").innerHTML = Array.from({ length: PAGES }, (_, i) =>
+      `<span class="${i < page ? "done" : i === page ? "now" : ""}"></span>`).join("");
+    $("stepLabel").textContent = `${page + 1} / ${PAGES}`;
+
+    const box = $("lines");
+    box.innerHTML = "";
+    LINES.slice(page * PER_PAGE, page * PER_PAGE + PER_PAGE).forEach((line, i) => {
+      const div = document.createElement("div");
+      div.className = "lyric";
+      div.innerHTML = `<span class="num">${page * PER_PAGE + i + 1}</span>`;
+      line.forEach(seg => {
+        if (typeof seg === "string") {
+          div.append(seg);
+        } else {
+          const inp = document.createElement("input");
+          inp.className = "blank";
+          inp.autocomplete = "off";
+          inp.spellcheck = false;
+          inp.value = answers[seg.id];
+          inp.style.width = `${Math.max(2.4, seg.a.length * 1.25 + 1)}em`;
+          inp.setAttribute("aria-label", `빈칸 ${seg.id + 1}`);
+          inp.addEventListener("input", () => answers[seg.id] = inp.value);
+          div.append(inp);
+        }
+      });
+      box.append(div);
+    });
+
+    const inputs = [...box.querySelectorAll(".blank")];
+    inputs.forEach((inp, i) => inp.addEventListener("keydown", e => {
+      if (e.key === "Enter" && !e.isComposing) {
+        e.preventDefault();
+        if (inputs[i + 1]) inputs[i + 1].focus(); else $("nextBtn").focus();
+      }
+    }));
+    const firstEmpty = inputs.find(x => !x.value) || inputs[0];
+    if (firstEmpty && window.matchMedia("(pointer: fine)").matches) firstEmpty.focus();
+
+    const last = page === PAGES - 1;
+    $("nextBtn").textContent = last ? "정답 확인 ✔" : "다음 ▶";
+    $("nextBtn").className = last ? "gold" : "primary";
+  }
+
+  function renderResult() {
+    const blanks = LINES.flat().filter(s => typeof s === "object");
+    const right = blanks.filter(isRight).length;
+    const total = blanks.length;
+    const ratio = right / total;
+    const starN = ratio === 1 ? 3 : ratio >= .7 ? 2 : ratio >= .4 ? 1 : 0;
+
+    $("stars").innerHTML = [0, 1, 2].map(i => `<span class="${i < starN ? "" : "off"}">⭐</span>`).join("");
+    $("score").textContent = `${total}개 중 ${right}개 정답!`;
+    $("msg").textContent =
+      ratio === 1 ? "와! 모두 맞았어요. 정말 잘했어요! 🎉" :
+      ratio >= .7 ? "아주 잘했어요! 틀린 것을 다시 확인해 보세요." :
+      ratio >= .4 ? "좋아요! 노래를 한 번 더 들어 볼까요?" :
+                    "괜찮아요! 노래를 다시 듣고 써 봐요. 💪";
+
+    const box = $("resultLines");
+    box.innerHTML = "";
+    LINES.forEach((line, i) => {
+      const div = document.createElement("div");
+      div.className = "lyric";
+      div.innerHTML = `<span class="num">${i + 1}</span>`;
+      line.forEach(seg => {
+        if (typeof seg === "string") { div.append(seg); return; }
+        const ok = isRight(seg);
+        const span = document.createElement("span");
+        const val = answers[seg.id].trim();
+        span.className = `ans ${ok ? "ok" : "bad"} ${val ? "" : "empty"}`;
+        span.textContent = ok ? seg.a : (val || "　");
+        div.append(span);
+        if (!ok) {
+          const fix = document.createElement("span");
+          fix.className = "fix";
+          fix.textContent = `→${seg.a}`;
+          div.append(fix);
+        }
+      });
+      box.append(div);
+    });
+
+    $("retryWrong").style.display = right === total ? "none" : "";
+    $("full").classList.remove("show");
+    if (right === total) confetti();
+  }
+
+  function confetti() {
+    const layer = document.createElement("div");
+    layer.className = "confetti";
+    const icons = ["⭐", "🐚", "🌊", "🎵", "✨", "🦀"];
+    for (let i = 0; i < 40; i++) {
+      const el = document.createElement("i");
+      el.textContent = icons[i % icons.length];
+      el.style.left = Math.random() * 100 + "vw";
+      el.style.animationDuration = 2 + Math.random() * 2 + "s";
+      el.style.animationDelay = Math.random() * .8 + "s";
+      layer.append(el);
+    }
+    document.body.append(layer);
+    setTimeout(() => layer.remove(), 5000);
+  }
+
+  $("full").innerHTML = "<h3>🎵 섬집 아기</h3>" + LINES.map(l =>
+    l.map(s => typeof s === "string" ? s : s.a).join("")).join("<br>");
+
+  $("startBtn").onclick = () => { page = 0; show("write"); renderPage(); };
+  // 이전: 첫 화면에서는 도입 화면으로 (쓴 답은 그대로 남아요)
+  $("prevBtn").onclick = () => { if (page > 0) { page--; renderPage(); } else show("intro"); };
+  $("nextBtn").onclick = () => {
+    if (page < PAGES - 1) { page++; renderPage(); }
+    else {
+      const empty = answers.filter(a => !a.trim()).length;
+      if (empty && !confirm(`아직 빈칸이 ${empty}개 있어요. 정답을 확인할까요?`)) return;
+      show("result"); renderResult();
+    }
+  };
+  $("retryWrong").onclick = () => {
+    const blanks = LINES.flat().filter(s => typeof s === "object");
+    blanks.forEach(s => { if (!isRight(s)) answers[s.id] = ""; });
+    const firstWrong = LINES.findIndex(l => l.some(s => typeof s === "object" && !answers[s.id]));
+    page = Math.floor(Math.max(0, firstWrong) / PER_PAGE);
+    show("write"); renderPage();
+  };
+  // 다시 해 보기: 답을 모두 지우고 첫 번째 쓰기 화면으로
+  $("tryAgain").onclick = () => { answers.fill(""); page = 0; show("write"); renderPage(); };
+  $("showFull").onclick = () => $("full").classList.toggle("show");
+  $("restart").onclick = () => { answers.fill(""); show("intro"); };
+</script>
+</body>
+</html>
